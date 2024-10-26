@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { AppBar, Toolbar, IconButton, Drawer, Box, Button, Badge } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Notifications, Logout } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import { logout } from '../stores/authStore';
 
 const Navbar = ({ toggleTheme, isDarkMode }) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -31,8 +32,13 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
                     <Box>
                         <IconButton>
                             <Badge color="error" variant="dot">
-                                <NotificationsIcon />
+                                <Notifications />
                             </Badge>
+                        </IconButton>
+                        <IconButton
+                            onClick={() =>logout()}
+                        >
+                            <Logout />
                         </IconButton>
 
                         {/* User avatar */}
