@@ -40,8 +40,8 @@
 
 ### Tasks:
 1. **BudgetAlert.js**:
-   - Implement the logic to track user budgets and notify them when limits are exceeded, both globally and per category.
-   - Calculate total expenses and compare them against the total budget limit.
+   - Implement the logic to track user budgets and notify them when limits are exceeded, both globally and per category. ✅
+   - Calculate total expenses and compare them against the total budget limit. ✅
    - Check if any category-specific limits are exceeded and show appropriate alerts.
 
 ### Skills Applied:
@@ -85,7 +85,7 @@
    - Ensure the footer layout is responsive and contains important links.
 
 7. **Navbar.js**:
-   - Implement a responsive navbar with authentication-aware links.
+   - Implement a responsive navbar with authentication-aware links. ✅
 
 ### Skills Applied:
 - Material UI components (`Box`, `Typography`, `Grid`)
