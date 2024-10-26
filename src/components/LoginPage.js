@@ -1,49 +1,62 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../stores/authStore';
+import React, { useEffect, useState } from 'react';
+import { useStore } from '@nanostores/react';
+import { useNavigation } from '../providers/NavigationContext';
+import { login, getUser } from '../stores/authStore';
+import { authStore } from '../stores/authStore';
+import { showAlert } from '../stores/alertStore';
+import { defaultUser } from '../constants/defaultUsers';
 import {
     Box,
     Button,
     TextField,
     Typography,
     Alert,
-    Grid
+    Grid,
 } from '@mui/material';
 
 function LoginPage() {
+    const auth = useStore(authStore);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showCredentials, setShowCredentials] = useState(false);
-    const navigate = useNavigate();
 
-    const defaultCredentials = {
-        email: 'default@example.com',
-        password: 'password123'
-    };
+    const navigate = useNavigation();
+
+    useEffect(() => {        
+        if (auth.isAuthenticated) {
+            showAlert('You are already logged in', 'info');
+            navigate('/');
+            return
+        }
+    }, [auth.isAuthenticated, navigate]);
 
     const handleLogin = (e) => {
         e.preventDefault();
 
-        // Validate that fields are not empty
-        // Instructions:
-        // - Check if the email and password fields are filled.
         if (!email || !password) {
-            // - If either is empty, set an appropriate error message.
+            setError('Please complete all fields');
             return;
         }
 
-        // Validate credentials
-        // Instructions:
-        // - Check if the entered credentials match the default credentials or the stored user credentials.
-        // - If valid, call the `login` function and navigate to the homepage.
-        // - If invalid, set an error message.
+        const stringDefaultCredentials = JSON.stringify(defaultUser);
+        const stringUserCredentials = JSON.stringify({ email, password });
+        const stringExistingUser = JSON.stringify(getUser(email));
+        
+        if (stringExistingUser !== stringUserCredentials && stringDefaultCredentials !== stringUserCredentials) {
+            setError('Invalid credentials');
+            return;
+        }
+        
+        login({ email, password });
+        navigate('/');
     };
 
     const handleShowDefaultCredentials = () => {
         // Show default credentials in case the user requests it
-        setEmail(defaultCredentials.email);
-        setPassword(defaultCredentials.password);
+        setEmail(defaultUser.email);
+        setPassword(defaultUser.password);
         setShowCredentials(true);
     };
 
@@ -80,15 +93,55 @@ function LoginPage() {
                 </Button>
             </form>
 
-            {/* Show error message when applicable */}
-            {/* - Use the Alert component to display the error message if one exists. */}
-            {/* - Ensure that registration and forgot password options are displayed below the error message if present. */}
-
             {showCredentials && (
                 <Alert severity="info" sx={{ mt: 2 }}>
-                    <strong>Email:</strong> {defaultCredentials.email}<br />
-                    <strong>Password:</strong> {defaultCredentials.password}
+                    <strong>Email:</strong> {defaultUser.email}<br />
+                    <strong>Password:</strong> {defaultUser.password}
                 </Alert>
+            )}
+
+            {error && (
+                <>
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                        <strong>Error:</strong> { error }<br />
+                    </Alert>
+                    <Box 
+                        sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'center',
+                            gap: 2,
+                            mt: 4,
+                            '& button': {
+                                backgroundColor: 'transparent',
+                                border: '1px solid #007EAE'
+                            },
+                            '& button:hover': {
+                                backgroundColor: 'rgba(0, 126, 174, 0.04)',
+                            }
+                        }}
+                    >
+                        <Button
+                            type="submit"
+                            variant="outlined"
+                            fullWidth
+                            color="inherit"
+                            onClick={() => {
+                                console.log('Register clicked')
+                                navigate('/register')
+                            }}
+                        >
+                            Register
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="outlined"
+                            fullWidth
+                            color="inherit"
+                        >
+                            Forgot Password
+                        </Button>
+                    </Box>
+                </>
             )}
         </Box>
     );

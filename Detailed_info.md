@@ -15,13 +15,13 @@
 
 ### Tasks:
 1. **LoginPage.js**:
-   - Implement the login form using **Material UI**.
+   - Implement the login form using **Material UI**. ✅
 
 2. **RegisterPage.js**:
-   - Ensure the registration form is properly validated.
+   - Ensure the registration form is properly validated. ✅
 
 3. **ProtectedRoute.js**:
-   - Protect routes based on authentication status.
+   - Protect routes based on authentication status. ✅
 
 ### Skills Applied:
 - User authentication flow

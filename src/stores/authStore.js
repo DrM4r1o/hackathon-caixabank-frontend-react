@@ -20,3 +20,20 @@ export const logout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('user');
 };
+
+export const register = (newUser) => {
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const existingUser = getUser(newUser.email);
+
+    if (!existingUser) {
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    return existingUser;
+};
+
+export const getUser = (email) => {
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    return users.find((user) => user.email === email);
+}
