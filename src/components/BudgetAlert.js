@@ -1,10 +1,9 @@
-// src/components/BudgetAlert.js
-import React, { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { userSettingsStore } from '../stores/userSettingsStore';
 import { transactionsStore } from '../stores/transactionStore';
 import { Alert } from '@mui/material';
-import { budgetAlertStore } from '../stores/budgetAlertStore'; // Importar el store de alertas
+import { updateBudgetAlert } from '../stores/budgetAlertStore'; // Importar el store de alertas
 
 const BudgetAlert = () => {
     const userSettings = useStore(userSettingsStore);
@@ -12,24 +11,48 @@ const BudgetAlert = () => {
 
     // Instructions:
     // - Calculate the total expenses from the transactions.
-    const totalExpense = 0; // Replace with the total expenses calculation.
+    const [totalExpense, setTotalExpense] = useState(0);
 
     // Determine if the budget has been exceeded
-    const budgetExceeded = false; // Replace with a comparison of totalExpense and userSettings.totalBudgetLimit
+    const [budgetExceeded, setBudgetExceeded] = useState(false); // Replace with a comparison of totalExpense and userSettings.totalBudgetLimit
+
+    useEffect(() => {
+        
+        const calculation = transactions.reduce((acc, operation) => {
+            return acc + operation;
+        });
+        
+        if(calculation > userSettings.totalBudgetLimit) {
+            setBudgetExceeded(true);
+        }
+        
+        setTotalExpense(calculation);
+    }, [transactions, userSettings.totalBudgetLimit]);
 
     // Use the useEffect hook to update the budgetAlertStore when the budget is exceeded
     useEffect(() => {
-        // Instructions:
-        // - If the budget has been exceeded, set the `isVisible` property in the `budgetAlertStore` to true and provide a warning message.
-        // - If the budget has not been exceeded, set `isVisible` to false and clear the message.
+        if(!budgetExceeded) {
+            updateBudgetAlert({
+                isVisible: false,
+                message: ''
+            });
+            return;
+        }
+        
+        updateBudgetAlert({
+            isVisible: budgetExceeded,
+            message: 'El presupuesto ha sido excedido'
+        });
     }, [budgetExceeded, userSettings.totalBudgetLimit]);
 
-    return (
-        // Conditional rendering of the alert
-        // Instructions:
-        // - If the budget is exceeded, return an `Alert` component with the appropriate message and severity.
-        null // Replace with conditional rendering logic
-    );
+
+    if(budgetExceeded) {
+        return (
+            <Alert severity="error" sx={{ marginBottom: '1rem' }}>
+                The budget has been exceeded
+            </Alert>
+        );
+    }
 };
 
 export default BudgetAlert;

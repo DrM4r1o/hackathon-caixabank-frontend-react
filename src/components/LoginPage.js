@@ -126,7 +126,6 @@ function LoginPage() {
                             fullWidth
                             color="inherit"
                             onClick={() => {
-                                console.log('Register clicked')
                                 navigate('/register')
                             }}
                         >
