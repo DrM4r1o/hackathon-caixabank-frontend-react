@@ -6,6 +6,10 @@ export const budgetAlertStore = atom({
     notificationCount: 0,      
 });
 
+if (process.env.NODE_ENV === 'development') {
+    window.budgetAlertStore = budgetAlertStore;
+}
+
 export const updateBudgetAlert = (message) => {
     budgetAlertStore.set({
         isVisible: true, 

@@ -40,16 +40,19 @@ function LoginPage() {
             return;
         }
 
+        const existingUser = getUser(email);
         const stringDefaultCredentials = JSON.stringify(defaultUser);
         const stringUserCredentials = JSON.stringify({ email, password });
-        const stringExistingUser = JSON.stringify(getUser(email));
+        const stringExistingUser = JSON.stringify({ email: existingUser.email, password: existingUser.password });
+
+        console.log(stringUserCredentials, stringExistingUser);
         
         if (stringExistingUser !== stringUserCredentials && stringDefaultCredentials !== stringUserCredentials) {
             setError('Invalid credentials');
             return;
         }
         
-        login({ email, password });
+        login(existingUser);
         navigate('/');
     };
 

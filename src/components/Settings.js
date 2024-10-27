@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { StringFormaters, toCamelCase } from '../utils/stringFormaters';
 import { useStore } from '@nanostores/react';
-import { userSettingsStore } from '../stores/userSettingsStore';
+import { userSettingsStore, updateBudget, updateCategoryBudget } from '../stores/userSettingsStore';
 import { budgetAlertStore, updateBudgetAlert } from '../stores/budgetAlertStore'; // Importar el store de alertas
 import {
     Box,
@@ -9,7 +10,7 @@ import {
     FormControlLabel,
     TextField,
     Button,
-    Grid,
+    Grid2,
     Paper,
     Alert,
 } from '@mui/material';
@@ -24,7 +25,18 @@ function Settings() {
     const [successMessage, setSuccessMessage] = useState('');
     const [error, setError] = useState('');
     const [totalBudgetLimit, setTotalBudgetLimit] = useState(userSettings.totalBudgetLimit);
+    const [categoryBudgets, setCategoryBudgets] = useState(userSettings.totalBudgetLimit);
+    const [disabledInputs, setDisabledInputs] = useState(false);
 
+    const handleBudgetLimitChange = (value) => {
+        setTotalBudgetLimit(Number(value));
+        updateBudget(Number(value));
+    }
+
+    const onChangeCategoryLimit = (category, value) => {
+        const categoryName = toCamelCase(category);
+        setCategoryBudgets({ [categoryName]: Number(value) });
+    }
 
     const handleSave = () => {
         // Instructions:
@@ -36,7 +48,18 @@ function Settings() {
         // Instructions:
         // - Check if the total expense exceeds the total budget limit.
         // - If exceeded, set the budgetExceeded state to true and update the budget alert.
+        updateCategoryBudget(categoryBudgets);
     };
+
+    useEffect(() => {
+        setDisabledInputs(totalBudgetLimit === 0 || !totalBudgetLimit);
+
+        const totalCategoryBudgets = Object.values(categoryBudgets).reduce((acc, curr) => acc + curr, 0);
+
+        if (totalCategoryBudgets > totalBudgetLimit) {
+            setError('Total category budgets exceed the total budget limit');
+        }
+    }, [totalBudgetLimit, categoryBudgets]);
 
     return (
         <Box sx={{ mt: 4, p: { xs: 2, md: 4 }, bgcolor: 'background.default' }}>
@@ -57,28 +80,31 @@ function Settings() {
                     name="totalBudgetLimit"
                     fullWidth
                     margin="normal"
-                    inputProps={{ min: 0, step: '0.01' }}
+                    slotProps={{ htmlInput: { min: 0, step: '0.01' }}}
                     sx={{ mt: 1 }}
+                    onChange={(e) => handleBudgetLimitChange(e.target.value)}
                     // Instructions: Bind the value and `onChange` to control the `totalBudgetLimit` state
                 />
             </Paper>
 
             <Paper sx={{ padding: 2, mt: 2, boxShadow: 3, borderRadius: 2 }}>
                 <Typography variant="h6" color="text.secondary">Category Budget Limits (€)</Typography>
-                <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid2 container spacing={2} sx={{ mt: 1 }}>
                     {expenseCategories.map((category) => (
-                        <Grid item xs={12} sm={6} md={4} key={category}>
+                        <Grid2 xs={12} sm={6} md={4} key={category}>
                             <TextField
                                 label={category}
                                 type="number"
                                 fullWidth
                                 margin="normal"
-                                inputProps={{ min: 0, step: '0.01' }}
-                                // Instructions: Bind value and `onChange` for each category's budget limit state
+                                disabled={disabledInputs}
+                                slotProps={{ htmlInput: { min: 0, step: '0.01' }}}
+                                onChange={(e) => onChangeCategoryLimit(category, e.target.value)}
+                                value={userSettings.categoryLimits[category]}
                             />
-                        </Grid>
+                        </Grid2>
                     ))}
-                </Grid>
+                </Grid2>
             </Paper>
 
             <Box sx={{ mt: 4 }}>
@@ -87,6 +113,7 @@ function Settings() {
                     color="primary"
                     fullWidth
                     sx={{ boxShadow: 2 }}
+                    onClick={handleSave}
                     // Instructions: Add `onClick` handler to save the settings by calling `handleSave`
                 >
                     Save Settings

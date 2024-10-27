@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useStore } from '@nanostores/react'; 
 import { authStore, logout } from '../stores/authStore';
 import { useNavigation } from '../providers/NavigationContext';
-import { allLinks } from '../utils/linkRoutes';
+import { allLinks } from '../constants/linkRoutes';
 
 const Navbar = ({ toggleTheme, isDarkMode }) => {
     const auth = useStore(authStore);
