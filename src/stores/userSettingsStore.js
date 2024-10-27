@@ -1,6 +1,6 @@
 import { atom } from 'nanostores';
 
-export const userSettingsStore = atom({
+export const userSettingsStore = atom(JSON.parse(localStorage.getItem('budgetData')) || {
     totalBudgetLimit: 0,
     categoryLimits: {},
     alertsEnabled: true,
@@ -18,8 +18,6 @@ const updateData = (data) => {
 
 export const updateBudget = (value) => {
     const updatedState = { ...userSettingsStore.get(), totalBudgetLimit: value,  };
-    console.log(value);
-    
     updateData(updatedState);
 }
 

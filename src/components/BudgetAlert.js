@@ -17,10 +17,12 @@ const BudgetAlert = () => {
     const [budgetExceeded, setBudgetExceeded] = useState(false); // Replace with a comparison of totalExpense and userSettings.totalBudgetLimit
 
     useEffect(() => {
-        
+        if(transactions.length === 0) return
+
         const calculation = transactions.reduce((acc, operation) => {
             return acc + operation;
         });
+        
         
         if(calculation > userSettings.totalBudgetLimit) {
             setBudgetExceeded(true);

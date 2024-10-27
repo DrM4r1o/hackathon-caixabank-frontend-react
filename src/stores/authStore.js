@@ -1,4 +1,5 @@
 import { atom } from 'nanostores';
+import { itemsLocalStorage } from '../constants/itemsLocalStorage';
 
 export const authStore = atom({
     isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
@@ -13,9 +14,11 @@ export const saveUserData = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const users = JSON.parse(localStorage.getItem('users'));
     const budgetData = JSON.parse(localStorage.getItem('budgetData'));
+    const transactions = JSON.parse(localStorage.getItem('transactions'));
     const newDataUser = {
         ...user,
         budgetData: budgetData,
+        transactions: transactions,
     };
 
     const newUsers = users.map((u) => {
@@ -26,18 +29,27 @@ export const saveUserData = () => {
 }
 
 export const login = (userData) => {
+    console.log(userData);
+    
+
+    const itemsName = itemsLocalStorage.filter((item) => item.onLoginAdd).flatMap(item => item.name);
+    const itemsToAdd = [userData, userData.budgetData, userData.transactions, true];
     authStore.set({ isAuthenticated: true, user: userData });
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('budgetData', JSON.stringify(userData.budgetData));
+
+    itemsName.forEach((itemName, i) => {        
+        localStorage.setItem(itemName, JSON.stringify(itemsToAdd[i] || ""));
+    });
 };
 
 export const logout = () => {
     saveUserData();
+
+    const itemsToRemove = itemsLocalStorage.filter((item) => item.onLogoutRemove);
     authStore.set({ isAuthenticated: false, user: null });
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('user');
-    localStorage.removeItem('budgetData');
+
+    itemsToRemove.forEach((itemInfo) => {
+        localStorage.removeItem(itemInfo.name);
+    });
 };
 
 export const register = (newUser) => {

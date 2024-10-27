@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { AppBar, Toolbar, IconButton, Drawer, Box, Button, Badge } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Drawer, Box, Badge } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Notifications, Logout, Login } from '@mui/icons-material';
+import { Notifications, Logout, Login, Person2 } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
-import { useStore } from '@nanostores/react'; 
+import { useStore } from '@nanostores/react';
 import { authStore, logout } from '../stores/authStore';
 import { useNavigation } from '../providers/NavigationContext';
 import { allLinks } from '../constants/linkRoutes';
@@ -41,6 +41,12 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
         );
     };
 
+    const renderLinks = () => {
+        return links.map((link, index) => (
+            <Link key={index} to={link.to}>{link.text}</Link>
+        ));
+    };
+
     return (
         <>
             <AppBar position="static"
@@ -50,7 +56,7 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
                 }}
             >
                 <Toolbar
-                    sx={{ 
+                    sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
                     }}
@@ -62,11 +68,22 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
                         sx={{
                             display: 'flex',
                             gap: '2rem',
+                            '& a': {
+                                color: 'inherit',
+                                textDecoration: 'none',
+                                padding: '0.5rem',
+                                transition: 'background-color 0.3s ease',
+                                borderRadius: '0.5rem',
+                            },
+                            '& a:hover': {
+                                backgroundColor: 'primary.light',
+                            },
+                            '@media (width <= 725px)': {
+                                display: 'none',
+                            },
                         }}
                     >
-                        {links.map((link, index) => (
-                            <Link key={index} to={link.to}>{link.text}</Link>
-                        ))}
+                        {renderLinks()}
                     </Box>
 
                     {/* Navigation links */}
@@ -76,7 +93,9 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
                         - If the user is not authenticated, show "Login" and "Register" links. 
                         - Use the `Link` component from `react-router-dom`. */}
 
-                    <Box>
+                    <Box
+                        sx={{ display: 'flex' }}
+                    >
                         <IconButton>
                             <Badge color="error" variant="dot">
                                 <Notifications />
@@ -91,6 +110,17 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
                         >
                             {renderAuthButton()}
                         </IconButton>
+                        <IconButton
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: 'primary.light',
+                                borderRadius: '50%'
+                            }}
+                        >
+                            <Person2 />
+                        </IconButton>
 
                         {/* User avatar */}
                         {/* Instructions:
@@ -100,14 +130,45 @@ const Navbar = ({ toggleTheme, isDarkMode }) => {
                 </Toolbar>
             </AppBar>
 
-            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-                <Box>
+            <Drawer 
+                anchor="left" 
+                open={drawerOpen} 
+                onClose={toggleDrawer(false)}
+                sx={{
+                    '& .MuiPaper-root': {
+                        borderRadius: '0 1rem 1rem 0',
+                    }
+                }}
+            >
+                <Box
+                    className="column-links"
+                    sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center',
+                        gap: '1rem', 
+                        padding: '1rem',
+                        width: '200px',
+                        '& a': {
+                            color: 'inherit',
+                            textDecoration: 'none',
+                            padding: '0.5rem',
+                            transition: 'background-color 0.3s ease',
+                            width: '100%',
+                            textAlign: 'center',
+                        },
+                        '& a:hover': {
+                            backgroundColor: 'primary.light',
+                        },
+                    }}
+                >
                     {/* Drawer navigation links */}
                     {/* Instructions:
                         - Display navigation links inside the drawer.
                         - Links should be based on the user's authentication status.
                         - For example, show links like "Dashboard", "Transactions", "Settings" if authenticated.
                         - Use the `Link` component from `react-router-dom`. */}
+                    {renderLinks()}
                 </Box>
             </Drawer>
         </>

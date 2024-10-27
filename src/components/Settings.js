@@ -1,36 +1,38 @@
-import { useState, useEffect } from 'react';
-import { StringFormaters, toCamelCase } from '../utils/stringFormaters';
-import { useStore } from '@nanostores/react';
-import { userSettingsStore, updateBudget, updateCategoryBudget } from '../stores/userSettingsStore';
-import { budgetAlertStore, updateBudgetAlert } from '../stores/budgetAlertStore'; // Importar el store de alertas
 import {
+    Alert,
     Box,
-    Typography,
-    Switch,
-    FormControlLabel,
-    TextField,
     Button,
+    FormControlLabel,
     Grid2,
     Paper,
-    Alert,
+    Switch,
+    TextField,
+    Typography,
 } from '@mui/material';
+import { useStore } from '@nanostores/react';
+import { useEffect, useState } from 'react';
 import { expenseCategories } from '../constants/categories';
-import { transactionsStore } from '../stores/transactionStore';
+import { updateBudget, updateCategoryBudget, userSettingsStore } from '../stores/userSettingsStore';
+import { toCamelCase } from '../utils/stringFormaters';
 
 function Settings() {
     const userSettings = useStore(userSettingsStore);
-    const transactions = useStore(transactionsStore);
 
     const [budgetExceeded, setBudgetExceeded] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [error, setError] = useState('');
     const [totalBudgetLimit, setTotalBudgetLimit] = useState(userSettings.totalBudgetLimit);
-    const [categoryBudgets, setCategoryBudgets] = useState(userSettings.totalBudgetLimit);
+    const [categoryBudgets, setCategoryBudgets] = useState(userSettings.categoryLimits);
     const [disabledInputs, setDisabledInputs] = useState(false);
+    const [disableAccept, setDisableAccept] = useState(false);
+    const [lastTotalBudget, setLastTotalBudget] = useState(0);
 
     const handleBudgetLimitChange = (value) => {
-        setTotalBudgetLimit(Number(value));
-        updateBudget(Number(value));
+        const val = Number(value);
+        const disable = lastTotalBudget > value;
+        
+        setTotalBudgetLimit(val);
+        setDisableAccept(disable);
+        setDisabledInputs(disable);
     }
 
     const onChangeCategoryLimit = (category, value) => {
@@ -38,28 +40,36 @@ function Settings() {
         setCategoryBudgets({ [categoryName]: Number(value) });
     }
 
-    const handleSave = () => {
-        // Instructions:
-        // - Validate the total category limits.
-        // - If the total category limits exceed the total budget limit, set an error message.
-        // - If validation passes, clear the error message and save the updated settings to the store.
-        // - After saving, display a success message indicating that the settings were saved successfully.
+    const getCategoryBudget = (category) => {
+        return userSettings.categoryLimits[toCamelCase(category)] ?? 0;
+    }
 
-        // Instructions:
-        // - Check if the total expense exceeds the total budget limit.
-        // - If exceeded, set the budgetExceeded state to true and update the budget alert.
+    const handleSave = () => {
+        const totalCategoryBudgets = Object.values(categoryBudgets).reduce((acc, curr) => acc + curr, 0);
+
+        if (totalCategoryBudgets > totalBudgetLimit) {
+            setBudgetExceeded(true);
+            setSuccessMessage('');
+            setDisableAccept(true);
+            setDisabledInputs(true);
+            setLastTotalBudget(totalCategoryBudgets)
+            return;
+        }
+
+        setBudgetExceeded(false);
+        setSuccessMessage('Settings saved successfully');
+        updateBudget(totalBudgetLimit);
         updateCategoryBudget(categoryBudgets);
     };
 
     useEffect(() => {
-        setDisabledInputs(totalBudgetLimit === 0 || !totalBudgetLimit);
+        if(!successMessage && !budgetExceeded) return;
 
-        const totalCategoryBudgets = Object.values(categoryBudgets).reduce((acc, curr) => acc + curr, 0);
-
-        if (totalCategoryBudgets > totalBudgetLimit) {
-            setError('Total category budgets exceed the total budget limit');
-        }
-    }, [totalBudgetLimit, categoryBudgets]);
+        setTimeout(() => {
+            setSuccessMessage('');
+            setBudgetExceeded(false);
+        }, 5000);
+    }, [successMessage, budgetExceeded]);
 
     return (
         <Box sx={{ mt: 4, p: { xs: 2, md: 4 }, bgcolor: 'background.default' }}>
@@ -83,6 +93,7 @@ function Settings() {
                     slotProps={{ htmlInput: { min: 0, step: '0.01' }}}
                     sx={{ mt: 1 }}
                     onChange={(e) => handleBudgetLimitChange(e.target.value)}
+                    value={totalBudgetLimit}
                     // Instructions: Bind the value and `onChange` to control the `totalBudgetLimit` state
                 />
             </Paper>
@@ -100,7 +111,7 @@ function Settings() {
                                 disabled={disabledInputs}
                                 slotProps={{ htmlInput: { min: 0, step: '0.01' }}}
                                 onChange={(e) => onChangeCategoryLimit(category, e.target.value)}
-                                value={userSettings.categoryLimits[category]}
+                                defaultValue={getCategoryBudget(category) || ''}
                             />
                         </Grid2>
                     ))}
@@ -114,27 +125,21 @@ function Settings() {
                     fullWidth
                     sx={{ boxShadow: 2 }}
                     onClick={handleSave}
-                    // Instructions: Add `onClick` handler to save the settings by calling `handleSave`
+                    disabled={disableAccept}
                 >
                     Save Settings
                 </Button>
             </Box>
 
             {budgetExceeded && (
-                <Alert severity="warning" sx={{ mt: 2 }}>
+                <Alert severity="warning" sx={{ position: 'fixed', bottom: 16, left: 16, zIndex: 9999 }}>
                     You have exceeded your budget limit of {totalBudgetLimit} €!
                 </Alert>
             )}
 
             {successMessage && (
-                <Alert severity="success" sx={{ mt: 2 }}>
+                <Alert severity="success" sx={{ position: 'fixed', bottom: 16, left: 16, zIndex: 9999 }}>
                     {successMessage}
-                </Alert>
-            )}
-
-            {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                    {error}
                 </Alert>
             )}
         </Box>
