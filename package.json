@@ -29,8 +29,7 @@
     "cypress:run": "cypress run",
     "cypress:run-e2e": "cypress run --config-file cypress.config.js --spec cypress/e2e/**/*.cy.js",
     "cypress:run-component": "cypress run --component --config-file cypress.config.js",
-    "cypress:open-component": "cypress open --component --config-file cypress.config.js",
-    "predeploy": "npm run build"
+    "cypress:open-component": "cypress open --component --config-file cypress.config.js"
   },
   "eslintConfig": {
     "extends": [
